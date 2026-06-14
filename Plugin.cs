@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace AutoCorpseSearch
 {
-    [BepInPlugin("com.maschine.AutoCorpseSearch", "maschine-AutoCorpseSearch", "1.0.0")]
+    [BepInPlugin("com.maschine.AutoCorpseSearch", "maschine-AutoCorpseSearch", "1.0.1")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -19,6 +19,9 @@ namespace AutoCorpseSearch
         private static ConfigEntry<int> _pocketsOrder;
         private static ConfigEntry<int> _backpackOrder;
         private static ConfigEntry<bool> _resumePartialSearch;
+        private static ConfigEntry<bool> _resumeContainerSearch;
+
+        public static bool ResumeContainerSearch => _resumeContainerSearch.Value;
 
         private void Awake()
         {
@@ -37,6 +40,12 @@ namespace AutoCorpseSearch
                 "Resume Partial Search",
                 true,
                 "Automatically resume searching slots that were interrupted (items still hidden).");
+
+            _resumeContainerSearch = Config.Bind(
+                "General",
+                "Resume Container Searches",
+                true,
+                "Automatically resume interrupted searches on regular loot containers when re-opening them.");
 
             new InventoryScreenShowPatch().Enable();
             new InventoryScreenClosePatch().Enable();

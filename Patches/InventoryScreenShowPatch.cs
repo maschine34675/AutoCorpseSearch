@@ -22,15 +22,24 @@ namespace AutoCorpseSearch
         [PatchPostfix]
         static void Postfix(InventoryController controller, CompoundItem lootItem)
         {
-            if (lootItem is not InventoryEquipment equipment) return;
-
-            var playerController = controller as Player.PlayerInventoryController;
-            if (playerController?.Inventory?.Equipment == equipment) return;
-
             var psc = controller?.SearchController as IPlayerSearchController;
             if (psc == null) return;
 
-            Plugin.StartSequentialSearch(psc, equipment);
+            if (lootItem is InventoryEquipment equipment)
+            {
+                var playerController = controller as Player.PlayerInventoryController;
+                if (playerController?.Inventory?.Equipment == equipment) return;
+
+                Plugin.StartSequentialSearch(psc, equipment);
+            }
+            else if (Plugin.ResumeContainerSearch
+                && lootItem is SearchableItemItemClass searchable
+                && psc.IsSearched(searchable)
+                && psc.ContainsUnknownItems(searchable)
+                && psc.CanStartNewSearchOperation())
+            {
+                psc.SearchContents(searchable);
+            }
         }
     }
 
