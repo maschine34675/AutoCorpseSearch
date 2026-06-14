@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace AutoCorpseSearch
 {
-    [BepInPlugin("com.maschine.AutoCorpseSearch", "maschine-AutoCorpseSearch", "1.0.1")]
+    [BepInPlugin("com.maschine.AutoCorpseSearch", "maschine-AutoCorpseSearch", "1.1.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
