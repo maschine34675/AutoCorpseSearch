@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace AutoCorpseSearch
 {
-    [BepInPlugin("com.maschine.AutoCorpseSearch", "maschine-AutoCorpseSearch", "1.1.0")]
+    [BepInPlugin("com.maschine.AutoCorpseSearch", "maschine-AutoCorpseSearch", "2.0.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; }
@@ -81,23 +81,19 @@ namespace AutoCorpseSearch
 
         private static IEnumerator SearchCorpseSlots(IPlayerSearchController psc, InventoryEquipment equipment)
         {
-            SearchableItemItemClass previous = null;
+            SearchableItem previous = null;
 
             foreach (var slotType in GetOrderedSlots())
             {
-                var item = equipment.GetSlot(slotType)?.ContainedItem as SearchableItemItemClass;
+                var item = equipment.GetSlot(slotType)?.ContainedItem as SearchableItem;
                 if (item == null) continue;
-
                 bool needsSearch = !psc.IsSearched(item)
                     || (_resumePartialSearch.Value && psc.ContainsUnknownItems(item));
                 if (!needsSearch) continue;
-
                 while (previous != null && psc.SearchOperations.Any(op => op.Item == previous))
                     yield return null;
-
                 if (previous != null && psc.ContainsUnknownItems(previous))
                     yield break;
-
                 if (!psc.IsSearched(item) || psc.ContainsUnknownItems(item))
                 {
                     psc.SearchContents(item);

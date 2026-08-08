@@ -33,7 +33,7 @@ namespace AutoCorpseSearch
                 Plugin.StartSequentialSearch(psc, equipment);
             }
             else if (Plugin.ResumeContainerSearch
-                && lootItem is SearchableItemItemClass searchable
+                && lootItem is SearchableItem searchable
                 && psc.IsSearched(searchable)
                 && psc.ContainsUnknownItems(searchable)
                 && psc.CanStartNewSearchOperation())

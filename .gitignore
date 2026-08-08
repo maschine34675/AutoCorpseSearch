@@ -1,0 +1,11 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# Machine-local assistant settings
+.claude/settings.local.json
+
+# Transient build output
+build_output.txt
