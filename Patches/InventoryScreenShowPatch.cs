@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace AutoCorpseSearch
 {
-    internal class InventoryScreenShowPatch : ModulePatch
+    internal class AcsInventoryScreenShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -25,25 +25,41 @@ namespace AutoCorpseSearch
             var psc = controller?.SearchController as IPlayerSearchController;
             if (psc == null) return;
 
-            if (lootItem is InventoryEquipment equipment)
+            var playerController = controller as Player.PlayerInventoryController;
+            var ownEquipment = playerController?.Inventory?.Equipment;
+            if (lootItem is InventoryEquipment equipment && ownEquipment != equipment)
             {
-                var playerController = controller as Player.PlayerInventoryController;
-                if (playerController?.Inventory?.Equipment == equipment) return;
-
-                Plugin.StartSequentialSearch(psc, equipment);
+                Plugin.EnqueueCorpseChain(psc, equipment);
             }
             else if (Plugin.ResumeContainerSearch
                 && lootItem is SearchableItem searchable
                 && psc.IsSearched(searchable)
-                && psc.ContainsUnknownItems(searchable)
-                && psc.CanStartNewSearchOperation())
+                && psc.ContainsUnknownItems(searchable))
             {
-                psc.SearchContents(searchable);
+                Plugin.EnqueueSingle(psc, searchable, SearchOrigin.LootScreen);
+            }
+            if (Plugin.SearchEquippedOnInventoryOpen && ownEquipment != null)
+            {
+                var sweep = new SearchJob
+                {
+                    Psc = psc,
+                    Origin = SearchOrigin.EquippedSweep,
+                    AbortOnUserCancel = true,
+                };
+
+                foreach (var slotType in Plugin.CarriedContainerSlots)
+                {
+                    var equipped = Plugin.GetSlotSafe(ownEquipment, slotType)?.ContainedItem as SearchableItem;
+                    if (equipped != null && Plugin.NeedsSearch(psc, equipped))
+                        sweep.Items.Add(equipped);
+                }
+
+                Plugin.Enqueue(sweep);
             }
         }
     }
 
-    internal class InventoryScreenClosePatch : ModulePatch
+    internal class AcsInventoryScreenClosePatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -53,7 +69,7 @@ namespace AutoCorpseSearch
         [PatchPrefix]
         static void Prefix()
         {
-            Plugin.CancelSearch();
+            Plugin.CancelScreenBoundJobs();
         }
     }
 }
